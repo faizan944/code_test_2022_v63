@@ -43,3 +43,31 @@ OR
 Thank you!
 
 
+-------------------------------------
+
+Solution
+
+X.
+A readme with:   Your thoughts about the code. What makes it amazing code.
+
+
+- My personally thoughts about the code are that code is not well structured. All business logic wrote in the repository class Which is not a good approach.
+  Because the repository pattern is used to interact with the database like you define methods in the base repository. 
+- I noticed that you are using Lazy loading in BookRepository class instead of eager loading which is not recommended.  So I replaced all lazy loading with eager loading
+- In BookRepository store function I noticed excessive use of in_array functions which affect the performance. I changed that approach with associative array mapping.
+I also noticed excessive use of hard-coded if else which makes code unreadable. I also noticed unnecessary variable memory allocation.
+- In BookRespository class I found one common helper function convertToMints so I created separate helper class for that.
+- In BookRespository class I found many email notifications which impact our code performance very badly. We always prefer to use queues for email notifications.
+- In BookController class there is one function called "distancefeed". In that function, you validate request variables using if-else.
+I replaced these if-else with validation form request class.
+
+Y.  Refactor it if you feel it needs refactoring.
+
+As you mentioned that Please do not invest more than 2-4 hours on this, so I tried my best to implement my way of thinking.
+I am sure that it will give you an idea of my approach.Hope you give me a chance to appear in next interview for further evaluation
+Thank you
+
+===== So expected output is a GitHub link with either =====
+
+https://github.com/faizan944/code_test_2022_v63
+

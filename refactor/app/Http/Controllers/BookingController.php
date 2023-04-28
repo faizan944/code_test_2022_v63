@@ -192,66 +192,45 @@ class BookingController extends Controller
         return response($response);
     }
 
-    public function distanceFeed(Request $request)
+    public function distanceFeed(Requests\BookingRequest $request)
     {
         $data = $request->all();
 
-        if (isset($data['distance']) && $data['distance'] != "") {
-            $distance = $data['distance'];
-        } else {
-            $distance = "";
-        }
-        if (isset($data['time']) && $data['time'] != "") {
-            $time = $data['time'];
-        } else {
-            $time = "";
-        }
-        if (isset($data['jobid']) && $data['jobid'] != "") {
-            $jobid = $data['jobid'];
+        $job = Job::find($data['jobid']);
+
+        if (!$job) {
+            return response()->json(['message' => 'Job not found'], 404);
         }
 
-        if (isset($data['session_time']) && $data['session_time'] != "") {
-            $session = $data['session_time'];
-        } else {
-            $session = "";
+        if ($data['flagged']) {
+            if (!$data['admincomment']) {
+                return response()->json(['message' => 'Please, add comment'], 422);
+            }
         }
 
-        if ($data['flagged'] == 'true') {
-            if($data['admincomment'] == '') return "Please, add comment";
-            $flagged = 'yes';
-        } else {
-            $flagged = 'no';
+        $distanceUpdated = false;
+        if (isset($data['distance']) || isset($data['time'])) {
+            $distanceUpdated = $job->distance()->update([
+                'distance' => isset($data['distance']) ? $data['distance'] : null,
+                'time' => isset($data['time']) ? $data['time'] : null,
+            ]);
         }
-        
-        if ($data['manually_handled'] == 'true') {
-            $manually_handled = 'yes';
-        } else {
-            $manually_handled = 'no';
-        }
-
-        if ($data['by_admin'] == 'true') {
-            $by_admin = 'yes';
-        } else {
-            $by_admin = 'no';
-        }
-
-        if (isset($data['admincomment']) && $data['admincomment'] != "") {
-            $admincomment = $data['admincomment'];
-        } else {
-            $admincomment = "";
-        }
-        if ($time || $distance) {
-
-            $affectedRows = Distance::where('job_id', '=', $jobid)->update(array('distance' => $distance, 'time' => $time));
+        $jobUpdated = false;
+        if (isset($data['admincomment']) || isset($data['session_time']) || isset($data['flagged']) || isset($data['manually_handled']) || isset($data['by_admin'])) {
+            $jobUpdated = $job->update([
+                'admin_comments' => isset($data['admincomment']) ? $data['admincomment'] : null,
+                'flagged' => $data['flagged'] ? 'yes' : 'no',
+                'session_time' => isset($data['session_time']) ? $data['session_time'] : null,
+                'manually_handled' => $data['manually_handled'] ? 'yes' : 'no',
+                'by_admin' => $data['by_admin'] ? 'yes' : 'no',
+            ]);
         }
 
-        if ($admincomment || $session || $flagged || $manually_handled || $by_admin) {
-
-            $affectedRows1 = Job::where('id', '=', $jobid)->update(array('admin_comments' => $admincomment, 'flagged' => $flagged, 'session_time' => $session, 'manually_handled' => $manually_handled, 'by_admin' => $by_admin));
-
+        if ($distanceUpdated || $jobUpdated) {
+            return response('Record updated!');
         }
 
-        return response('Record updated!');
+        return response()->json(['message' => 'Nothing to update'], 200);
     }
 
     public function reopen(Request $request)
